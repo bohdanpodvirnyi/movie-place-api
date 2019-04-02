@@ -1,5 +1,5 @@
-from flask import Flask, jsonify
-from recommendations import get_titles_list, improved_recommendations, get_imdbid_by_baseid
+from flask import Flask, jsonify, request
+from recommendations import *
 
 app = Flask(__name__)
 app.secret_key = 'python/labs/lab3'
@@ -27,15 +27,15 @@ def autocomplete_user_search(search_text):
     return jsonify({'results': modified_list})
 
 
-@app.route('/recommend/<film_id>', methods=['GET'])
-def get_recommendations_by_one(film_id):
-    movies = get_titles_list()
-    movie = movies.get(int(film_id))
-    if movie is None:
-        return something_went_wrong()
-    else:
-        recommended_movies = improved_recommendations(movie, 5)
+@app.route('/recommend', methods=['POST'])
+def get_recommendations_by_one():
+    json = request.get_json()
+    movie_names = json['movie_names']
+    if len(movie_names) != 0:
+        recommended_movies = several_films(movie_names)
         return jsonify({'results': recommended_movies})
+    else:
+        return something_went_wrong()
 
 
 def get_login_error():

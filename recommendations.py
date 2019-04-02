@@ -53,14 +53,6 @@ def get_imdbid_by_baseid(baseid):
     return convert_to_imdb_id(imdb_id)
 
 
-def several_films(films_list):
-    result = []
-    for title in films_list:
-        names = improved_recommendations(title,2)
-        result.extend(names)
-    return result
-
-
 def convert_to_imdb_id(id):
     string_id = str(id)
     result = ''
@@ -69,3 +61,21 @@ def convert_to_imdb_id(id):
         result += '0'
     result = 'tt' + result
     return result + string_id
+
+
+def several_films(films_list):
+    result = []
+    for title in films_list:
+        names = improved_recommendations(title, 2)
+        result.extend(names)
+    ids = []
+    for recommendation in result:
+        ids.append(get_imdbid_by_name(recommendation))
+    return ids
+
+
+def get_imdbid_by_name(movie_name):
+    movies = get_titles_list()
+    result_dic = {key: value for key, value in movies.items() if value == movie_name}
+    result_list = [(v, k) for k, v in result_dic.items()]
+    return get_imdbid_by_baseid(result_list[0][1])
