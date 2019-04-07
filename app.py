@@ -64,6 +64,8 @@ def movies_sorting(movie, search_text):
 def modify(original_list):
     new_list = []
     for movie in original_list:
-        new_movie = (movie[0], get_imdbid_by_baseid(movie[1]))
+        if len(new_list) == 5:
+            return new_list
+        new_movie = {'name': movie[0], 'base_id': movie[1], 'imdb_id': get_imdbid_by_baseid(movie[1])}
         new_list.append(new_movie)
     return new_list
