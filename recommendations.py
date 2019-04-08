@@ -44,23 +44,31 @@ def improved_recommendations(title, count):
 
 
 def get_titles_list():
-    return smd['title'].to_dict()
+    list = []
+    titles = smd['title'][smd['title'].notnull()]
+    for title in titles:
+        series = smd['imdb_id'][smd['title'] == title]
+        id = series.loc[series.first_valid_index()]
+        list.append({'title': title, 'imdb_id': id})
+    return list
 
 
-def get_imdbid_by_baseid(baseid):
-    links = pd.read_csv('links_small.csv')
-    imdb_id = links[links['imdbId'].notnull()]['imdbId'].astype('int')[baseid]
-    return convert_to_imdb_id(imdb_id)
+def generate_autocomplete(search_text):
+    list = []
+    titles = smd['title'][smd['title'].str.contains(search_text, case=False)]
+    for title in titles:
+        series = smd['imdb_id'][smd['title'] == title]
+        id = series.loc[series.first_valid_index()]
+        list.append({'title': title, 'imdb_id': id})
+    return list
 
 
-def convert_to_imdb_id(id):
-    string_id = str(id)
-    result = ''
-    current_count = 7 - len(string_id)
-    for i in range(0, current_count):
-        result += '0'
-    result = 'tt' + result
-    return result + string_id
+def find_movie_id(title):
+    title_series = smd['title'][smd['title'].isin([title])]
+    title = title_series.loc[title_series.first_valid_index()]
+    id_series = smd['imdb_id'][smd['title'] == title]
+    id = id_series.loc[id_series.first_valid_index()]
+    return id
 
 
 def several_films(films_list):
@@ -70,12 +78,6 @@ def several_films(films_list):
         result.extend(names)
     ids = []
     for recommendation in result:
-        ids.append(get_imdbid_by_name(recommendation))
+        print(recommendation)
+        ids.append(find_movie_id(recommendation))
     return ids
-
-
-def get_imdbid_by_name(movie_name):
-    movies = get_titles_list()
-    result_dic = {key: value for key, value in movies.items() if value == movie_name}
-    result_list = [(v, k) for k, v in result_dic.items()]
-    return get_imdbid_by_baseid(result_list[0][1])
